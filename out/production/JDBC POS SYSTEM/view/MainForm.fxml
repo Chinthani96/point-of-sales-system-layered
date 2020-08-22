@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.effect.Glow?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane fx:id="root" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.MainFormController">
+   <children>
+      <Label alignment="CENTER" layoutX="148.0" layoutY="37.0" prefHeight="36.0" prefWidth="324.0" text=" Pos System">
+         <font>
+            <Font name="Sana Regular" size="18.0" />
+         </font>
+      </Label>
+      <Button fx:id="btnManageCustomer" layoutX="99.0" layoutY="121.0" mnemonicParsing="false" onAction="#btnManageCustomer_OnAction" prefHeight="36.0" prefWidth="422.0" text="Manage Customer" />
+      <Button fx:id="btnManageItems" layoutX="99.0" layoutY="172.0" mnemonicParsing="false" onAction="#btnManageItems_OnAction" prefHeight="36.0" prefWidth="422.0" text="Manage Items" />
+      <Button fx:id="btnPlaceOrder" layoutX="99.0" layoutY="229.0" mnemonicParsing="false" onAction="#btnPlaceOrder_OnAction" prefHeight="36.0" prefWidth="422.0" text="Place Order" />
+      <Button fx:id="btnSearchOrder" layoutX="99.0" layoutY="283.0" mnemonicParsing="false" onAction="#btnSearchOrder_OnAction" prefHeight="36.0" prefWidth="422.0" text="Search Order" />
+   </children>
+   <effect>
+      <Glow level="0.13" />
+   </effect>
+</AnchorPane>
