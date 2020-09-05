@@ -1,5 +1,9 @@
 package controller;
 
+import business.BOFactory;
+import business.BOType;
+import business.SuperBO;
+import business.custom.CustomerBO;
 import db.DBConnection;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -20,6 +24,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 
 public class CustomerFormController {
     public Button btnDelete;
@@ -31,6 +36,7 @@ public class CustomerFormController {
     public Button btnAddCustomer;
     public TableView<CustomerTM> tblCustomerDetails;
     public AnchorPane root;
+    private static CustomerBO customerBO = BOFactory.getInstance().getBO(BOType.CUSTOMER);
 
     public void initialize(){
         //basic initializations
@@ -79,27 +85,8 @@ public class CustomerFormController {
     }
 
     public void btnDelete_OnAction(ActionEvent actionEvent) {
-
-
         CustomerTM selectedCustomer = tblCustomerDetails.getSelectionModel().getSelectedItem();
-
-        try {
-            PreparedStatement preparedStatement = DBConnection.getInstance().getConnection().prepareStatement("DELETE from Customer where CustomerID=?");
-            preparedStatement.setObject(1,selectedCustomer.getCustomerId());
-            int affectedRows = preparedStatement.executeUpdate();
-
-            if(affectedRows>0){
-                loadAllCustomer();
-                tblCustomerDetails.getSelectionModel().clearSelection();
-                System.out.println("Deleted Successfully");
-            }
-            else{
-                new Alert(Alert.AlertType.ERROR,"Delete Failed",ButtonType.OK).show();
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        customerBO.deleteCustomer(selectedCustomer.getCustomerId());
 
         btnDelete.setDisable(true);
         btnSave.setDisable(true);
@@ -122,49 +109,17 @@ public class CustomerFormController {
         String customerName = txtCustomerName.getText();
         String customerAddress = txtCustomerAddress.getText();
 
-        CustomerTM selectedCustomer = tblCustomerDetails.getSelectionModel().getSelectedItem();
-
         if(btnSave.getText().equals("Update")){
-            try {
-                PreparedStatement pst = DBConnection.getInstance().getConnection().prepareStatement("UPDATE Customer SET CustomerID=?,CustomerName=?,CustomerAddress=? where CustomerID='"+customerId+"'");
-                pst.setObject(1,customerId);
-                pst.setObject(2,customerName);
-                pst.setObject(3,customerAddress);
-                int affectedRows = pst.executeUpdate();
-
-//                if(affectedRows>0){
-//                    loadAllCustomer();
-//                    tblCustomerDetails.getSelectionModel().clearSelection();
-//                    System.out.println("Database updated successfully.");
-//                }
-
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            customerBO.updateCustomer(customerId,customerName,customerAddress);
         }
         else {
-            try {
-                PreparedStatement pst = DBConnection.getInstance().getConnection().prepareStatement("INSERT  into Customer VALUES (?,?,?)");
-                pst.setObject(1, customerId);
-                pst.setObject(2, customerName);
-                pst.setObject(3, customerAddress);
-                int affectedRows = pst.executeUpdate();
-
-//                if (affectedRows > 0) {
-//                    loadAllCustomer();
-//                    tblCustomerDetails.getSelectionModel().clearSelection();
-//                    System.out.println("Customer added successfully");
-//                } else {
-//                    new Alert(Alert.AlertType.ERROR, "Failed to add Customer to the Database", ButtonType.OK).show();
-//                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            customerBO.saveCustomer(customerId,customerName,customerAddress);
         }
         //clear textfields
         txtCustomerId.clear();
         txtCustomerName.clear();
         txtCustomerAddress.clear();
+        loadAllCustomer();
 
     }
 
@@ -178,45 +133,15 @@ public class CustomerFormController {
     }
 
     private void generateId(){
-        ObservableList<CustomerTM> customers = tblCustomerDetails.getItems();
-
-        int maxId =0;
-        for(CustomerTM customer : customers){
-            int id = Integer.parseInt(customer.getCustomerId().replace("C",""));
-            if(id>maxId){
-                maxId = id;
-            }
-        }
-        System.out.println(maxId);
-        maxId++;
-        if(maxId<10){
-            txtCustomerId.setText("C00"+maxId);
-        }
-        else if(maxId<100){
-            txtCustomerId.setText("C0"+maxId);
-        }
-        else{
-            txtCustomerId.setText("C"+maxId);
-        }
+        String newId = customerBO.generateNewCustomerId();
+        txtCustomerId.setText(newId);
     }
 
     private void loadAllCustomer(){
-        try {
-            Statement st = DBConnection.getInstance().getConnection().createStatement();
-            ResultSet rst = st.executeQuery("SELECT  * from Customer");
-            ObservableList<CustomerTM> customers = tblCustomerDetails.getItems();
-            customers.clear();
-
-            while(rst.next()){
-                String id = rst.getString(1);
-                String name = rst.getNString(2);
-                String address = rst.getString(3);
-                customers.add(new CustomerTM(id,name,address));
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        tblCustomerDetails.getItems().clear();
+        List<CustomerTM> allCustomers = customerBO.getAllCustomers();
+        ObservableList<CustomerTM> customerTMS = FXCollections.observableArrayList(allCustomers);
+        tblCustomerDetails.setItems(customerTMS);
     }
 
 }

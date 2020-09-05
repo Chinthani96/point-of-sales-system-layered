@@ -1,6 +1,9 @@
-package dao.impl;
+package dao.custom.impl;
 
+import com.sun.org.apache.bcel.internal.generic.Select;
 import dao.CrudUtil;
+import dao.custom.OrderDAO;
+import entity.Customer;
 import entity.Order;
 
 import java.sql.ResultSet;
@@ -8,11 +11,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class OrderDAOImpl {
+public class OrderDAOImpl implements OrderDAO {
     public List<Order> findAll() throws SQLException {
         ResultSet resultSet = CrudUtil.execute("SELECT * FROM `Order`");
         ArrayList<Order> orders = new ArrayList<>();
-        for (Order order: orders) {
+        while(resultSet.next()){
             orders.add(new Order(resultSet.getString(1),resultSet.getDate(2),resultSet.getString(3)));
         }
         return orders;
@@ -24,7 +27,7 @@ public class OrderDAOImpl {
     }
 
     public boolean save(Order entity) throws SQLException {
-        boolean result = CrudUtil.execute("INSERT INTO `Order` VALUES (?,?,?)");
+        boolean result = CrudUtil.execute("INSERT INTO `Order` VALUES (?,?,?)",entity.getId(),entity.getDate(),entity.getCustomerId());
         if(!result){
             return false;
         }
@@ -46,5 +49,14 @@ public class OrderDAOImpl {
         }
         return true;
     }
+
+    public String lastOrderId() throws SQLException {
+        ResultSet resultset = CrudUtil.execute("SELECT id FROM `Order` ORDER BY id DESC LIMIT 1");
+        if(resultset.next()) {
+            return resultset.getString(1);
+        }
+        return null;
+    }
+
 }
 

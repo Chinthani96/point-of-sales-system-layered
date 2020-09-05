@@ -1238,55 +1238,103 @@
       <ColNames>id</ColNames>
       <Primary>1</Primary>
     </key>
-    <foreign-key id="313" parent="297" name="Order_ibfk_1">
+    <foreign-key id="313" parent="297" name="FKckicmtwun913u69pha7agsgpd">
       <ColNames>customerId</ColNames>
       <RefSchemaName>pos_system2</RefSchemaName>
       <RefTableName>Customer</RefTableName>
       <RefColNames>id</RefColNames>
     </foreign-key>
-    <column id="314" parent="298" name="orderId">
+    <foreign-key id="314" parent="297" name="Order_ibfk_1">
+      <ColNames>customerId</ColNames>
+      <RefSchemaName>pos_system2</RefSchemaName>
+      <RefTableName>Customer</RefTableName>
+      <RefColNames>id</RefColNames>
+    </foreign-key>
+    <column id="315" parent="298" name="orderId">
       <Position>1</Position>
       <DataType>varchar(10)|0s</DataType>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="315" parent="298" name="itemCode">
+    <column id="316" parent="298" name="itemCode">
       <Position>2</Position>
       <DataType>varchar(10)|0s</DataType>
       <NotNull>1</NotNull>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="316" parent="298" name="qty">
+    <column id="317" parent="298" name="qty">
       <Position>3</Position>
       <DataType>int|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <column id="317" parent="298" name="unitPrice">
+    <column id="318" parent="298" name="unitPrice">
       <Position>4</Position>
       <DataType>decimal(6,2 digit)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
-    <index id="318" parent="298" name="itemCode">
+    <column id="319" parent="298" name="item_id">
+      <Position>5</Position>
+      <DataType>varchar(255)|0s</DataType>
+      <ColumnKind>normal</ColumnKind>
+    </column>
+    <column id="320" parent="298" name="order_id">
+      <Position>6</Position>
+      <DataType>varchar(255)|0s</DataType>
+      <ColumnKind>normal</ColumnKind>
+    </column>
+    <index id="321" parent="298" name="itemCode">
       <ColNames>itemCode</ColNames>
       <Type>btree</Type>
     </index>
-    <key id="319" parent="298" name="PRIMARY">
+    <index id="322" parent="298" name="FKh0kq8f7gjxkf3uh6gcrp46y24">
+      <ColNames>item_id</ColNames>
+      <Type>btree</Type>
+    </index>
+    <index id="323" parent="298" name="FKdc1kkre95n6msywx6kvg0us5n">
+      <ColNames>order_id</ColNames>
+      <Type>btree</Type>
+    </index>
+    <key id="324" parent="298" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <ColNames>orderId
 itemCode</ColNames>
       <Primary>1</Primary>
     </key>
-    <foreign-key id="320" parent="298" name="OrderDetail_ibfk_1">
+    <foreign-key id="325" parent="298" name="FK21x4a3ee3h5uwombp0n7cayng">
       <ColNames>orderId</ColNames>
       <RefSchemaName>pos_system2</RefSchemaName>
       <RefTableName>Order</RefTableName>
       <RefColNames>id</RefColNames>
     </foreign-key>
-    <foreign-key id="321" parent="298" name="OrderDetail_ibfk_2">
+    <foreign-key id="326" parent="298" name="OrderDetail_ibfk_1">
+      <ColNames>orderId</ColNames>
+      <RefSchemaName>pos_system2</RefSchemaName>
+      <RefTableName>Order</RefTableName>
+      <RefColNames>id</RefColNames>
+    </foreign-key>
+    <foreign-key id="327" parent="298" name="FKtogd3d0kvb3mreeh4pn7qox19">
       <ColNames>itemCode</ColNames>
       <RefSchemaName>pos_system2</RefSchemaName>
       <RefTableName>Item</RefTableName>
       <RefColNames>code</RefColNames>
+    </foreign-key>
+    <foreign-key id="328" parent="298" name="OrderDetail_ibfk_2">
+      <ColNames>itemCode</ColNames>
+      <RefSchemaName>pos_system2</RefSchemaName>
+      <RefTableName>Item</RefTableName>
+      <RefColNames>code</RefColNames>
+    </foreign-key>
+    <foreign-key id="329" parent="298" name="FKh0kq8f7gjxkf3uh6gcrp46y24">
+      <ColNames>item_id</ColNames>
+      <RefSchemaName>pos_system2</RefSchemaName>
+      <RefTableName>Item</RefTableName>
+      <RefColNames>code</RefColNames>
+    </foreign-key>
+    <foreign-key id="330" parent="298" name="FKdc1kkre95n6msywx6kvg0us5n">
+      <ColNames>order_id</ColNames>
+      <RefSchemaName>pos_system2</RefSchemaName>
+      <RefTableName>Order</RefTableName>
+      <RefColNames>id</RefColNames>
     </foreign-key>
   </database-model>
 </dataSource>

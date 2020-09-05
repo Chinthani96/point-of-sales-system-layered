@@ -1,8 +1,12 @@
 package controller;
 
+import business.BOFactory;
+import business.BOType;
+import business.custom.OrderBO;
 import db.DBConnection;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
@@ -15,6 +19,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+import util.OrderDetailsTM;
 import util.SearchOrderTM;
 
 import java.awt.event.MouseEvent;
@@ -23,6 +28,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.List;
 
 public class SearchOrderFormController {
     public TableView<SearchOrderTM> tblOrders;
@@ -30,6 +36,7 @@ public class SearchOrderFormController {
     public AnchorPane root;
     public Button btnBack;
     public static ArrayList<SearchOrderTM> ordersArray = new ArrayList<>();
+    private static OrderBO orderBO = BOFactory.getInstance().getBO(BOType.ORDER);
 
     public void initialize(){
         //map columns
@@ -69,28 +76,11 @@ public class SearchOrderFormController {
     }
 
     private void loadTable(){
-        try {
-            Statement stm = DBConnection.getInstance().getConnection().createStatement();
-            ResultSet rst = stm.executeQuery("select o.orderId,o.orderDate,o.CustomerID,c.customerName, Sum(d.OrderQTY*i.unitPrice) as Total\n" +
-                    "from orders o,orderDetail d,item i, customer c\n" +
-                    "where o.orderId = d.orderId && d.itemCode = i.itemCode && o.CustomerID = c.CustomerID group by o.orderId");
             ObservableList<SearchOrderTM> items = tblOrders.getItems();
             items.clear();
-
-            while (rst.next()){
-                String orderId = rst.getString(1);
-                String orderDate = rst.getString(2);
-                String customerId = rst.getString(3);
-                String customerName = rst.getString(4);
-                double total = Double.parseDouble(rst.getString(5));
-
-                items.add(new SearchOrderTM(orderId,orderDate,customerId,customerName,total));
-                ordersArray.add(new SearchOrderTM(orderId,orderDate,customerId,customerName,total));
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+            List<SearchOrderTM> orderDetails = orderBO.getOrderDetails();
+            ObservableList<SearchOrderTM> searchOrderTMS= FXCollections.observableArrayList(orderDetails);
+            tblOrders.setItems(searchOrderTMS);
     }
 
     public void tblOrders_OnMouseClicked(javafx.scene.input.MouseEvent mouseEvent) throws IOException {

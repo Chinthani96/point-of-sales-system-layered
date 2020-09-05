@@ -2,7 +2,7 @@ package entity;
 
 import java.sql.Date;
 
-public class Order {
+public class Order implements SuperEntity {
     private String id;
     private Date date;
     private String customerId;

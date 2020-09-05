@@ -1,21 +1,23 @@
-package dao.impl;
+package dao.custom.impl;
 
 import dao.CrudUtil;
+import dao.custom.CustomerDAO;
 import entity.Customer;
+import entity.SuperEntity;
 
-import java.sql.PreparedStatement;
+import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CustomerDAOImpl {
+public class CustomerDAOImpl implements CustomerDAO {
     public List<Customer> findAll() throws SQLException {
         ResultSet resultSet = CrudUtil.execute("SELECT * FROM Customer");
         ArrayList<Customer> customers = new ArrayList<>();
 
-        for (Customer customer : customers) {
-             customers.add(new Customer(resultSet.getString(1), resultSet.getString(2), resultSet.getString(3)));
+        while(resultSet.next()){
+            customers.add(new Customer(resultSet.getString(1), resultSet.getString(2), resultSet.getString(3)));
         }
         return customers;
     }
@@ -47,5 +49,13 @@ public class CustomerDAOImpl {
             return false;
         }
         return true;
+    }
+
+    public String getLastCustomerId() throws SQLException {
+        ResultSet resultSet = CrudUtil.execute("SELECT id FROM Customer ORDER BY id DESC LIMIT 1");
+        if(resultSet.next()) {
+            return resultSet.getString(1);
+        }
+        return null;
     }
 }

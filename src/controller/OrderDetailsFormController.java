@@ -1,8 +1,15 @@
 package controller;
 
+import business.BOFactory;
+import business.BOType;
+import business.SuperBO;
+import business.custom.CustomerBO;
+import business.custom.ItemBO;
+import business.custom.OrderBO;
 import db.DBConnection;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
@@ -15,13 +22,10 @@ import javafx.stage.Stage;
 import util.*;
 
 import java.io.IOException;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.List;
 
 public class OrderDetailsFormController {
     public AnchorPane root;
@@ -41,6 +45,9 @@ public class OrderDetailsFormController {
     public Button btnBack;
     public Button btnAdd;
     public Button btnAddOrder;
+    private static OrderBO orderBO = BOFactory.getInstance().getBO(BOType.ORDER);
+    private static ItemBO itemBO= BOFactory.getInstance().getBO(BOType.ITEM);
+    private static CustomerBO customerBO= BOFactory.getInstance().getBO(BOType.CUSTOMER);
 
     public void initialize() {
 
@@ -141,39 +148,26 @@ public class OrderDetailsFormController {
         String orderId = txtOrderID.getText();
         String orderDate = txtOrderDate.getText();
         CustomerTM selectedCustomer= cmbCustomerId.getSelectionModel().getSelectedItem();
+//        String unitPrice = txtUnitPrice.getText();
         String customerId = selectedCustomer.getCustomerId();
         addToOrders(orderId,customerId,orderDate);
 
         ObservableList<OrderDetailsTM> items = tblOrderDetails.getItems();
         for(OrderDetailsTM item:items) {
-
             String itemCode = item.getItemId();
+            System.out.println(itemCode);
             int qty = item.getQty();
-            addToOrderDetail(orderId,itemCode,qty);
+            System.out.println(qty);
+            addToOrderDetail(orderId,itemCode,qty,item.getUnitPrice());
+            orderBO.saveNewQty(qty,itemCode);
         }
         calculateOrderTotal();
+        loadAllItems();
     }
 
     private void generateId() {
-        try {
-            Statement stm = DBConnection.getInstance().getConnection().createStatement();
-            ResultSet resultSet = stm.executeQuery("SELECT OrderID from Orders order by OrderID desc limit 1");
-            resultSet.next();
-            String orderId = resultSet.getString(1);
-
-            int val = Integer.parseInt(orderId.substring(1, 4));
-            val++;
-            if (val < 10) {
-                txtOrderID.setText("D00" + val);
-            } else if (val < 100) {
-                txtOrderID.setText("D0" + val);
-            } else {
-                txtOrderID.setText("D" + val);
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        String newOrderId = orderBO.generateNewOrderId();
+        txtOrderID.setText(newOrderId);
     }
     public void btnAdd_OnAction(ActionEvent actionEvent) {
         ItemTM item = cmbItemID.getSelectionModel().getSelectedItem();
@@ -198,78 +192,24 @@ public class OrderDetailsFormController {
 
     @SuppressWarnings("Duplicates")
     private void addToOrders(String orderId, String customerId, String date){
-        try {
-            PreparedStatement pst = DBConnection.getInstance().getConnection().prepareStatement("Insert into Orders VALUES (?,?,?)");
-            pst.setObject(1,orderId);
-            pst.setObject(2,date);
-            pst.setObject(3,customerId);
-
-//            int affectedRows = pst.executeUpdate();
-//            if (affectedRows>0){
-//                System.out.println("Table orders have been updated successfully.");
-//            }
-//            else{
-//                System.out.println("Failed to update the order table");
-//            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        orderBO.saveOrder(orderId, Date.valueOf(date),customerId);
     }
     @SuppressWarnings("Duplicates")
-    private void addToOrderDetail(String orderId,String ItemCode,int OrderQty){
-        try {
-            PreparedStatement pst = DBConnection.getInstance().getConnection().prepareStatement("Insert into OrderDetail values (?,?,?)");
-            pst.setObject(1,orderId);
-            pst.setObject(2,ItemCode);
-            pst.setObject(3,OrderQty);
-            int affectedRows = pst.executeUpdate();
-
-//            if(affectedRows>0){
-//                System.out.println("Table orders have been updated successfully.");
-//            }
-//            else{
-//                System.out.println("Failed to update the order table");
-//            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+    private void addToOrderDetail(String orderId,String itemCode,int orderQty,double unitPrice){
+        orderBO.saveOrderDetail(orderId,itemCode,orderQty,unitPrice);
 
     }
     private void loadAllCustomers(){
-        try {
-            Statement stm = DBConnection.getInstance().getConnection().createStatement();
-            ResultSet rst = stm.executeQuery("Select * from Customer");
-            ObservableList<CustomerTM> customers = cmbCustomerId.getItems();
-
-            while(rst.next()){
-                String customerId = rst.getString(1);
-                String customerName = rst.getString(2);
-                String customerAddress = rst.getString(3);
-
-                customers.add(new CustomerTM(customerId,customerName,customerAddress));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        List<CustomerTM> allCustomers = customerBO.getAllCustomers();
+        cmbCustomerId.getItems().clear();
+        ObservableList<CustomerTM> customerTMS = FXCollections.observableArrayList(allCustomers);
+        cmbCustomerId.setItems(customerTMS);
     }
     private void loadAllItems(){
-        try {
-            Statement stm = DBConnection.getInstance().getConnection().createStatement();
-            ResultSet rst = stm.executeQuery("SELECT  * from Item");
-            ObservableList<ItemTM> items = cmbItemID.getItems();
-
-            while(rst.next()){
-                String itemId = rst.getString(1);
-                String description = rst.getString(2);
-                int qtyOnHand = Integer.parseInt(rst.getString(4));
-                double unitPrice = Double.parseDouble(rst.getString(3));
-
-                items.add(new ItemTM(itemId,description,unitPrice,qtyOnHand));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        List<ItemTM> allItems = itemBO.getAllItems();
+        cmbItemID.getItems().clear();
+        ObservableList<ItemTM> itemTMS = FXCollections.observableArrayList(allItems);
+        cmbItemID.setItems(itemTMS);
     }
     private void calculateOrderTotal(){
         ObservableList<OrderDetailsTM> orderDetails = tblOrderDetails.getItems();

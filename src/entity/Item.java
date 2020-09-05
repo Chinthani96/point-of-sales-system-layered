@@ -2,7 +2,7 @@ package entity;
 
 import java.math.BigDecimal;
 
-public class Item {
+public class Item implements SuperEntity {
     private String code;
     private String description;
     private BigDecimal unitPrice;

@@ -1,8 +1,13 @@
 package controller;
 
+import business.BOFactory;
+import business.BOType;
+import business.SuperBO;
+import business.custom.ItemBO;
 import db.DBConnection;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
@@ -19,6 +24,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 
 public class ItemFormController {
     public TextField txtItemID;
@@ -31,6 +37,7 @@ public class ItemFormController {
     public Button btnDelete;
     public Button btnBack;
     public AnchorPane root;
+    private static ItemBO itemBO = BOFactory.getInstance().getBO(BOType.ITEM);
 
     public void initialize(){
         btnSave.setDisable(true);
@@ -81,24 +88,7 @@ public class ItemFormController {
         if(selectedItem==null){
             return;
         }
-
-        try {
-            PreparedStatement pst = DBConnection.getInstance().getConnection().prepareStatement("DELETE from Item where ItemCode=?");
-            pst.setObject(1,selectedItem.getItemId());
-            int i = pst.executeUpdate();
-
-            if(i>0){
-                loadAllItems();
-                tblItemDetails.getSelectionModel().clearSelection();
-                System.out.println("Item deleted successfully");
-            }
-            else{
-                new Alert(Alert.AlertType.ERROR,"Failed to delete item",ButtonType.OK).show();
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        itemBO.deleteItem(selectedItem.getItemId());
 
         btnSave.setText("Save");
         btnSave.setDisable(true);
@@ -113,54 +103,16 @@ public class ItemFormController {
     @SuppressWarnings("Duplicates")
     public void btnSave_OnAction(ActionEvent actionEvent) {
         //TODO validations
-
         String itemId = txtItemID.getText();
         String description = txtDescription.getText();
         double price = Double.parseDouble(txtUnitPrice.getText());
         int qtyOnHand = Integer.parseInt(txtQtyOnHand.getText());
 
         if(btnSave.getText().equals("Update")){
-
-            try {
-                PreparedStatement pst = DBConnection.getInstance().getConnection().prepareStatement("UPDATE Item SET ItemCode=?,Description=?,UnitPrice=?,QtyOnHand=? where ItemCode='" + itemId + "'");
-                pst.setObject(1,itemId);
-                pst.setObject(2,description);
-                pst.setObject(3,price);
-                pst.setObject(4,qtyOnHand);
-                int i = pst.executeUpdate();
-
-//                  if(i>0){
-//                    loadAllItems();
-//                    System.out.println("Item updated successfully");
-//                    tblItemDetails.getSelectionModel().clearSelection();
-//                    btnSave.setText("Save");
-//                }
-//                else{
-//                    new Alert(Alert.AlertType.ERROR,"Failed to update", ButtonType.OK).show();
-//                }
-
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            itemBO.updateItem(itemId,description,price,qtyOnHand);
         }
         else{
-            try {
-                PreparedStatement pst = DBConnection.getInstance().getConnection().prepareStatement("INSERT into Item VALUES (?,?,?,?)");
-                pst.setObject(1,itemId);
-                pst.setObject(2,description);
-                pst.setObject(3,price);
-                pst.setObject(4,qtyOnHand);
-                int i = pst.executeUpdate();
-
-//                if(i>0){
-//                    loadAllItems();
-//                    System.out.println("Item added successfully");
-//                    tblItemDetails.getSelectionModel().clearSelection();
-//                }
-
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            itemBO.saveItem(itemId,description,price,qtyOnHand);
         }
         btnSave.setDisable(true);
         btnDelete.setDisable(true);
@@ -170,6 +122,7 @@ public class ItemFormController {
         txtDescription.clear();
         txtQtyOnHand.clear();
         txtUnitPrice.clear();
+        loadAllItems();
     }
     public void btnAdd_OnAction(ActionEvent actionEvent) {
         btnAddItem.setDisable(true);
@@ -180,45 +133,14 @@ public class ItemFormController {
     }
 
     public void loadAllItems(){
-        try {
-            Statement statement = DBConnection.getInstance().getConnection().createStatement();
-            ResultSet resultSet = statement.executeQuery("SELECT * from Item");
-            ObservableList items = tblItemDetails.getItems();
-            items.clear();
-
-            while(resultSet.next()){
-                String id = resultSet.getString(1);
-                String description = resultSet.getString(2);
-                double price = Double.parseDouble(resultSet.getString(3));
-                int qtyOnHand = Integer.parseInt(resultSet.getString(4));
-                items.add(new ItemTM(id,description,price,qtyOnHand));
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        tblItemDetails.getItems().clear();
+        List<ItemTM> allItems = itemBO.getAllItems();
+        ObservableList<ItemTM> itemTMS = FXCollections.observableArrayList(allItems);
+        tblItemDetails.setItems(itemTMS);
     }
     private void generateId(){
-        ObservableList<ItemTM> items = tblItemDetails.getItems();
-
-        int maxId=0;
-
-        for(ItemTM item: items){
-            String id = item.getItemId().replace("I","");
-            if(Integer.parseInt(id)>maxId){
-                maxId = Integer.parseInt(id);
-            }
-        }
-        maxId++;
-        if(maxId<10){
-            txtItemID.setText("I00"+maxId);
-        }
-        else if(maxId<100){
-            txtItemID.setText("I0"+maxId);
-        }
-        else{
-            txtItemID.setText("I"+maxId);
-        }
+        String newItemId = itemBO.generateNewItemId();
+        txtItemID.setText(newItemId);
     }
 
 }

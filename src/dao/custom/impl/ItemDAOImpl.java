@@ -1,6 +1,7 @@
-package dao.impl;
+package dao.custom.impl;
 
 import dao.CrudUtil;
+import dao.custom.ItemDAO;
 import entity.Item;
 
 import java.sql.ResultSet;
@@ -8,12 +9,12 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ItemDAOImpl {
+public class ItemDAOImpl implements ItemDAO {
     public List<Item> findAll() throws SQLException {
         ResultSet resultSet = CrudUtil.execute("SELECT * FROM Item");
         ArrayList<Item> items = new ArrayList<>();
 
-        for (Item item : items) {
+        while(resultSet.next()){
             items.add(new Item(resultSet.getString(1),resultSet.getString(2),resultSet.getBigDecimal(3),resultSet.getInt(4)));
         }
         return items;
@@ -46,5 +47,29 @@ public class ItemDAOImpl {
             return false;
         }
         return true;
+    }
+
+    public String getLastItemId() throws SQLException {
+        ResultSet resultSet = CrudUtil.execute("SELECT code FROM Item ORDER BY code DESC LIMIT 1");
+        if(resultSet.next()) {
+            return resultSet.getString(1);
+        }
+        return null;
+    }
+
+    public int getQty(String pk) throws Exception {
+        ResultSet resultSet = CrudUtil.execute("SELECT qtyOnHand FROM Item WHERE code=?", pk);
+        if(resultSet.next()) {
+            return Integer.parseInt(resultSet.getString(1));
+        }
+        return 0;
+    }
+
+    public boolean updateQty(int newQty, String code) throws SQLException {
+        boolean result =  CrudUtil.execute("UPDATE Item set qtyOnhand=? WHERE code=?", newQty, code);
+        if(result){
+            return true;
+        }
+        return false;
     }
 }

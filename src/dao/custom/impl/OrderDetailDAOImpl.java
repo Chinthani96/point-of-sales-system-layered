@@ -1,7 +1,7 @@
-package dao.impl;
+package dao.custom.impl;
 
 import dao.CrudUtil;
-import entity.Order;
+import dao.custom.OrderDetailDAO;
 import entity.OrderDetail;
 
 import java.sql.ResultSet;
@@ -9,11 +9,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class OrderDetailDAOImpl {
+public class OrderDetailDAOImpl implements OrderDetailDAO {
     public List<OrderDetail> findAll() throws SQLException {
         ResultSet resultSet = CrudUtil.execute("SELECT * FROM OrderDetail");
         ArrayList<OrderDetail> orderDetails = new ArrayList<>();
-        for (OrderDetail orderDetail : orderDetails) {
+        while(resultSet.next()){
             orderDetails.add(new OrderDetail(resultSet.getString(1),resultSet.getString(2),resultSet.getInt(3),resultSet.getBigDecimal(4)));
         }
     return orderDetails;
@@ -25,8 +25,9 @@ public class OrderDetailDAOImpl {
     }
 
     public boolean save(OrderDetail entity) throws SQLException {
-        boolean result = CrudUtil.execute("INSERT INTO OrderDetail VALUES (?,?,?,?)");
+        boolean result = CrudUtil.execute("INSERT INTO OrderDetail (orderId, itemCode, qty, unitPrice) VALUES (?,?,?,?)",entity.getOrderDetail_pk().getOrderId(),entity.getOrderDetail_pk().getItemCode(),entity.getQty(),entity.getUnitPrice());
         if(!result){
+            System.out.println("error");
             return false;
         }
         return true;
