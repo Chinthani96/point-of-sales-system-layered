@@ -26,7 +26,7 @@ public class ItemDAOImpl implements ItemDAO {
     }
 
     public boolean save(Item entity) throws SQLException {
-        boolean result = CrudUtil.execute("INSERT INTO Item VALUES (?,?,?,?)");
+        boolean result = CrudUtil.execute("INSERT INTO Item VALUES (?,?,?,?)",entity.getCode(),entity.getDescription(),entity.getQtyOnHand(),entity.getUnitPrice());
         if (!result) {
             return false;
         }
@@ -34,7 +34,7 @@ public class ItemDAOImpl implements ItemDAO {
     }
 
     public boolean update(Item entity) throws SQLException {
-        boolean result = CrudUtil.execute("UPDATE Item SET description=?,unitPrice=?,qtyOnHand=? WHERE code?");
+        boolean result = CrudUtil.execute("UPDATE Item SET description=?,unitPrice=?,qtyOnHand=? WHERE code?",entity.getDescription(),entity.getUnitPrice(),entity.getQtyOnHand(),entity.getCode());
         if(!result){
             return false;
         }

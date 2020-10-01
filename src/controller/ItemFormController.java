@@ -97,7 +97,7 @@ public class ItemFormController {
         txtItemID.clear();
         txtUnitPrice.clear();
         txtQtyOnHand.clear();
-
+        loadAllItems();
     }
 
     @SuppressWarnings("Duplicates")
@@ -128,7 +128,11 @@ public class ItemFormController {
         btnAddItem.setDisable(true);
         txtDescription.requestFocus();
         btnSave.setDisable(false);
-
+        btnSave.setText("Save");
+        txtItemID.clear();
+        txtDescription.clear();
+        txtQtyOnHand.clear();
+        txtUnitPrice.clear();
         generateId();
     }
 
