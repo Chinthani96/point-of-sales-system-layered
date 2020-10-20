@@ -8,9 +8,9 @@ This is a point of sales system which is developed according to the layered arch
 Setup
 -------------------------------------------------------------------
 1. Fork or download the repository using the URL
-[Link](https://github.com/Chinthani96/point-of-sales-system-layered.git)
+https://github.com/Chinthani96/point-of-sales-system-layered.git
 
-to clone type,
+to clone,
 	-git clone https://github.com/Chinthani96/point-of-sales-system-layered.git
 
 2. Add the dependencies inside the lib folder to the libraries in the project structure.
