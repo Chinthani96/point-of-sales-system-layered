@@ -11,14 +11,14 @@ Setup
 https://github.com/Chinthani96/point-of-sales-system-layered.git
 
 to clone,
-	git clone https://github.com/Chinthani96/point-of-sales-system-layered.git
+	- git clone https://github.com/Chinthani96/point-of-sales-system-layered.git
 
 2. Add the dependencies inside the lib folder to the libraries in the project structure.
 
 Technologies and Frameworks used
 -----------------------------------------------------------------------
 
-+Java FX
-+JDBC
-+JFoenix
+- Java FX
+- JDBC
+- JFoenix
 
